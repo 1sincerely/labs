@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Заказы — Список</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #000; }
+
+  .header { height: 80px; border-bottom: 1px solid #ccc; display: flex; align-items: center; padding: 0 32px; gap: 40px; }
+  .logo { font-size: 20px; font-weight: 700; }
+  .nav { display: flex; gap: 28px; font-size: 14px; color: #333; }
+  .avatar { margin-left: auto; width: 32px; height: 32px; border: 1px solid #000; border-radius: 50%; }
+
+  .layout { display: flex; min-height: calc(100vh - 80px); }
+  .sidebar { width: 240px; border-right: 1px solid #ccc; padding: 16px 0; }
+  .sidebar-item { height: 48px; display: flex; align-items: center; padding: 0 24px; font-size: 14px; color: #333; }
+  .sidebar-item.active { background: #f5f5f5; border-left: 3px solid #000; font-weight: 600; color: #000; }
+
+  .content { flex: 1; padding: 32px; }
+  .page-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .page-title { font-size: 24px; font-weight: 700; }
+
+  .btn { height: 44px; padding: 0 20px; border: 1px solid #000; background: #fff; font-size: 14px; cursor: pointer; border-radius: 4px; font-family: inherit; }
+  .btn-primary { background: #000; color: #fff; }
+  .btn-sm { height: 32px; padding: 0 12px; font-size: 13px; }
+
+  .filters { display: flex; gap: 12px; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 16px; }
+  .input-sm { height: 36px; padding: 0 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; font-family: inherit; background: #fff; }
+
+  .table-wrap { border: 1px solid #ccc; border-radius: 8px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 14px 16px; }
+  th { background: #f5f5f5; font-weight: 600; border-bottom: 1px solid #ccc; }
+  td { border-bottom: 1px solid #eee; }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+  .badge-dark { background: #333; color: #fff; }
+  .badge-mid { background: #ccc; color: #000; }
+  .badge-light { background: #f0f0f0; color: #000; border: 1px solid #ccc; }
+
+  .pagination { display: flex; justify-content: space-between; margin-top: 16px; font-size: 14px; color: #666; }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">RESTAURANT</div>
+    <div class="nav"><span>Меню</span><span>Заказы</span><span>Отчёты</span></div>
+    <div class="avatar"></div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-item">Главная</div>
+      <div class="sidebar-item active">Заказы</div>
+      <div class="sidebar-item">Меню</div>
+      <div class="sidebar-item">Клиенты</div>
+      <div class="sidebar-item">Отчёты</div>
+      <div class="sidebar-item">Настройки</div>
+    </div>
+
+    <div class="content">
+      <div class="page-head">
+        <div class="page-title">Заказы</div>
+        <button class="btn btn-primary">+ Новый заказ</button>
+      </div>
+
+      <div class="filters">
+        <select class="input-sm" style="width:160px;"><option>Все статусы</option></select>
+        <select class="input-sm" style="width:160px;"><option>Сегодня</option></select>
+        <input class="input-sm" style="margin-left:auto; width:280px;" placeholder="Поиск по клиенту...">
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>№</th><th>Клиент</th><th>Сумма</th><th>Статус</th><th>Время</th></tr></thead>
+          <tbody>
+            <tr><td>101</td><td>Иванов</td><td>1 250 ₽</td><td><span class="badge badge-dark">Готовится</span></td><td>12:30</td></tr>
+            <tr><td>102</td><td>Петров</td><td>890 ₽</td><td><span class="badge badge-mid">Готов</span></td><td>12:25</td></tr>
+            <tr><td>103</td><td>Сидоров</td><td>2 100 ₽</td><td><span class="badge badge-light">Принят</span></td><td>12:20</td></tr>
+            <tr><td>104</td><td>Кузнецов</td><td>560 ₽</td><td><span class="badge badge-mid">Оплачен</span></td><td>12:10</td></tr>
+            <tr><td>105</td><td>Морозов</td><td>1 800 ₽</td><td><span class="badge badge-light">Отменён</span></td><td>11:55</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <div>Показано 1–5 из 47</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-sm">← Назад</button>
+          <button class="btn btn-sm">Вперёд →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
