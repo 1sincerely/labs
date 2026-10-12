@@ -205,7 +205,75 @@ export const ROUTES = {
       order.updatedAt = now();
 
       return order;
-    }
+    },
     
+    'GET /api/stats': (query) => {
+      return {
+        preparingOrders: orders.filter((o) => o.status === 'cooking').length,
+        paidOrders: orders.filter((o) => o.status === 'paid').length,
+        servedOrders: orders.filter((o) => o.status === 'served').length,
+        cancelledOrders: orders.filter((o) => o.status === 'cancelled').length,
+        acceptedOrders: orders.filter((o) => o.status === 'accepted').length,
+        newOrders: orders.filter((o) => o.status === 'new').length,
+        readyOrders: orders.filter((o) => o.status === 'ready').length 
+      };
+    },
+
+    'GET /api/dishes': (query) => filterList(dishes, query),
+
+    'GET /api/dishes/:id': (query, body, params) => {
+      const dish = dishes.find((d) => d.id === Number(params.id));
+      if (!dish) return reply(404, { error: 'Блюдо не найдено' });
+      return dish;
+    },
+
+    'GET /api/categories': () => categories,
+
+    'POST /api/dishes': (query, body, params) => {
+      if (!body.name || body.price == null) return reply(400, { error: 'Некорректные параметры' });
+      
+      const newDish = {
+        id: counters.dish++,
+        categoryId: body.categoryId,
+        name: body.name,
+        description: body.description,
+        price: body.price,
+        weight: body.weight,
+        calories: body.calories,
+        cookTime: body.cookTime,
+        available: true,   //TODO: add validation
+      };
+
+      dishes.push(newDish);
+
+      return newDish;
+    },
     
+    'PUT /api/dishes/:id': (query, body, params) => {
+      const dish = dishes.find((d) => d.id === Number(params.id));
+      if (!dish) return reply(404, { error: 'Блюдо не найдено' });
+
+      dish.categoryId =  body.categoryId ?? dish.categoryId;
+      dish.name = body.name ?? dish.name;
+      dish.description = body.description ?? dish.description;
+      dish.price = body.price ?? dish.price;
+      dish.weight = body.weight ?? dish.weight;
+      dish.calories = body.calories ?? dish.calories;
+      dish.cookTime = body.cookTime ?? dish.cookTime;
+      dish.available = body.available ?? dish.available;
+
+      return dish;
+
+    },
+
+    'DELETE /api/dishes/:id': (query, body, params) => {
+      const index = dishes.findIndex((d) => d.id === Number(params.id));
+      if (index === -1) return reply(404, { error: 'Блюдо не найдено'});
+
+      const [deleted] = dishes.splice(index, 1);
+
+      return deleted;
+    },
+
+
 }
