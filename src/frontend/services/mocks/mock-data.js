@@ -160,11 +160,13 @@ export function now() {
 
 export const ROUTES = {
     'GET /api/orders': (query) => filterList(orders, query),
+
     'GET /api/orders/:id': (query, body, params) => {
         const order = orders.find((o) => o.id === Number(params.id));
         if (!order) return reply(404, { error: 'Заказ не найден' });
         return order;
     },
+
     'POST /api/orders': (query, body, params) => {
         if (!body.items || body.items.length === 0) return reply(400, { error: 'Некорректные параметры' });
 
@@ -191,6 +193,19 @@ export const ROUTES = {
         return newOrder;
     },
 
+    'PUT /api/orders/:id/status': (query, body, params) => {
+      const order = orders.find((o) => o.id === Number(params.id));
+      if (!order) return reply(404, { error: 'Заказ не найден' });
+
+      const statuses = ['cooking', 'paid', 'new', 'accepted', 'ready', 'served', 'cancelled'];
+
+      if (!statuses.includes(body.status)) return reply(400, { error: 'Некорректные параметры' });
+
+      order.status = body.status;
+      order.updatedAt = now();
+
+      return order;
+    }
     
     
 }
