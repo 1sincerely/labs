@@ -1,4 +1,4 @@
-import { ROUTES } from 'mock-data.js'
+import { ROUTES } from './mock-data.js'
 
 const config = {
     minDelay: 300,

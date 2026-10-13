@@ -167,6 +167,23 @@ export function now() {
 }
 
 export const ROUTES = {
+    'POST /api/auth/login': (query, body) => {
+        const user = users.find((u) => u.login === body.login);
+
+        if (!user || user.password !== body.password) return reply(401, { error: 'Неверный логин или пароль' });
+        if (!user.active) return reply(403, { error: 'Пользователь неактивен' });
+
+        return {
+          token: 'mock-jwt-' + user.id + '-' + Date.now(),
+          user: {
+            id: user.id,
+            name: user.name,
+            login: user.login,
+            role: user.role,
+            position: user.position,
+          }
+        };
+    },
     'GET /api/orders': (query) => filterList(orders, query),
 
     'GET /api/orders/:id': (query, body, params) => {
@@ -282,12 +299,4 @@ export const ROUTES = {
 
       return deleted;
     },
-
-    'POST /api/login': (query, body, params) => {
-      const user = users.find((u) => u.login === body.login);
-      
-      if (!user) return reply(404, { error: 'Пользователь не найден' });
-
-    },
-
 }
