@@ -275,8 +275,11 @@ export const ROUTES = {
       return deleted;
     },
 
-    'POST /api/login' : () => {
+    'POST /api/login': (query, body, params) => {
+      const user = users.find((u) => u.login === body.login);
       
-    }
+      if (!user) return reply(404, { error: 'Пользователь не найден' });
+      
+    },
 
 }
