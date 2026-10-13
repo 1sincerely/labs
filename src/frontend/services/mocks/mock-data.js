@@ -50,6 +50,14 @@ export const clients = [
 // status: 'new' | 'accepted' | 'cooking' | 'ready' | 'served' | 'paid' | 'cancelled'
 // ═══════════════════════════════════════════════════════════════
 
+export const counters = {
+  order: 106,
+  dish: 12,
+  category: 6,
+  user: 6,
+  client: 6,
+};
+
 export const orders = [
   {
     id: 101,
@@ -279,7 +287,7 @@ export const ROUTES = {
       const user = users.find((u) => u.login === body.login);
       
       if (!user) return reply(404, { error: 'Пользователь не найден' });
-      
+
     },
 
 }
