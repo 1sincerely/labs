@@ -231,6 +231,15 @@ export const ROUTES = {
 
       return order;
     },
+    'DELETE /api/orders/:id': (query, body, params) => {
+        const index = orders.findIndex((o) => o.id === Number(params.id));
+        if (index === -1) return reply(404, { error: 'Заказ не найден' });
+
+        orders.splice(index, 1);
+        return null;
+    },
+
+    'GET /api/clients': (query) => filterList(clients, query),
     
     'GET /api/stats': (query) => {
       return {
