@@ -1,0 +1,66 @@
+[
+    {
+        "id": 1,
+        "dish_id": 1,
+        "client_name": "Иванов И.И.",
+        "status": "new",
+        "amount": 700,
+        "created_at": "2026-09-08 12:30"
+    },
+    {
+        "id": 2,
+        "dish_id": 3,
+        "client_name": "Петров П.П.",
+        "status": "cooking",
+        "amount": 890,
+        "created_at": "2026-09-08 12:25"
+    },
+    {
+        "id": 3,
+        "dish_id": 4,
+        "client_name": "Сидоров С.С.",
+        "status": "ready",
+        "amount": 420,
+        "created_at": "2026-09-08 12:20"
+    },
+    {
+        "id": 4,
+        "dish_id": 3,
+        "client_name": "Кузнецов К.К.",
+        "status": "paid",
+        "amount": 1780,
+        "created_at": "2026-09-08 12:10"
+    },
+    {
+        "id": 5,
+        "dish_id": 1,
+        "client_name": "Морозов М.М.",
+        "status": "cooking",
+        "amount": 350,
+        "created_at": "2026-09-08 11:55"
+    },
+    {
+        "id": 6,
+        "dish_id": 5,
+        "client_name": "Иванов И.И.",
+        "status": "new",
+        "amount": 180,
+        "created_at": "2026-09-08 13:00"
+    },
+    {
+        "id": 7,
+        "dish_id": 2,
+        "client_name": "Иван",
+        "status": "new",
+        "amount": 1200,
+        "created_at": "2026-10-14 21:49"
+    },
+    {
+        "id": 8,
+        "dish_id": 1,
+        "client_name": "Игорь",
+        "status": "new",
+        "amount": 2222,
+        "created_at": "2026-10-14 21:59"
+    }
+]
