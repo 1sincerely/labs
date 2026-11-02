@@ -88,27 +88,3 @@ curl -i http://localhost:8000/api/stats
 | **422** | Ошибка валидации данных |
 | **500** | Внутренняя ошибка сервера |
 
-## Тестирование API
-| № | Запрос | Ожидаемый код | Получен код | Комментарий |
-| --- | --- | --- | --- | --- |
-| 1 | GET /api/orders | 200 | 200 | Массив из 5 заказов |
-| 2 | GET /api/orders?status=cooking | 200 | 200 | Массив из 2 заказов (только cooking) |
-| 3 | GET /api/orders/1 | 200 | 200 | Один заказ, объект с полями |
-| 4 | GET /api/orders/999 | 404 | 404 | `{ "error": "Заказ не найден" }` |
-| 5 | POST /api/orders (корректное тело) | 201 | 201 | Создан заказ с id=6 |
-| 6 | POST /api/orders (короткое имя) | 422 | 422 | Объект `errors` с полями |
-| 7 | POST /api/orders (тело "abc") | 400 | 400 | `{ "error": "Тело запроса не является корректным JSON" }` |
-| 8 | PUT /api/orders/1 (status=ready) | 200 | 200 | Статус обновлён |
-| 9 | PUT /api/orders/1 (status=invalid) | 422 | 422 | `errors.status` |
-| 10 | PUT /api/orders/999 | 404 | 404 | Заказ не найден |
-| 11 | DELETE /api/orders/6 | 204 | 204 | Пустое тело |
-| 12 | DELETE /api/orders/999 | 404 | 404 | Заказ не найден |
-| 13 | DELETE /api/orders (без id) | 405 | 405 | Заголовок `Allow: GET, POST` |
-| 14 | GET /api/dishes | 200 | 200 | Массив из 5 блюд |
-| 15 | GET /api/dishes/1 | 200 | 200 | Блюдо + связанные заказы |
-| 16 | GET /api/dishes/999 | 404 | 404 | Блюдо не найдено |
-| 17 | POST /api/dishes (корректное тело) | 201 | 201 | Создано блюдо с id=6 |
-| 18 | POST /api/dishes (короткое имя) | 422 | 422 | Ошибки валидации |
-| 19 | PUT /api/dishes/1 (price=400) | 200 | 200 | Цена обновлена |
-| 20 | DELETE /api/dishes/6 | 204 | 204 | Пустое тело |
-| 21 | GET /api/stats | 200 | 200 | Объект: totalOrders, totalDishes, byStatus |
