@@ -56,4 +56,33 @@ final class OrderRepository
         );
         return $order;
     }
+    public function save(array $order): void
+    {
+        $orders = $this->all();
+        foreach ($orders as $i => $o) {
+            if ($o['id'] === $order['id']) {
+                $orders[$i] = $order;
+                break;
+            }
+        }
+        file_put_contents(
+            $this->file,
+            json_encode($orders, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+            LOCK_EX
+        );
+    }
+
+    public function delete(int $id): void
+    {
+        $orders = $this->all();
+        $orders = array_values(array_filter(
+            $orders,
+            fn(array $o): bool => $o['id'] !== $id
+        ));
+        file_put_contents(
+            $this->file,
+            json_encode($orders, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+            LOCK_EX
+        );
+    }
 }

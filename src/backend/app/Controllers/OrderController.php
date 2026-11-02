@@ -1,12 +1,11 @@
 <?php
-// app/Controllers/orderController.php — контроллер задач: список, просмотр, создание.
 
 declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Models\OrderRepository;
 use App\Models\DishRepository;
+use App\Models\OrderRepository;
 
 final class OrderController
 {
@@ -19,88 +18,109 @@ final class OrderController
         $this->dishes = new DishRepository();
     }
 
-    // GET /orders  или  GET /orders?status=done
     public function index(): void
     {
-        $status = $_GET['status'] ?? '';          // параметр из адреса после «?»; если его нет — пустая строка
+        $status = $_GET['status'] ?? '';
         $orders = $this->orders->all();
 
-        if ($status !== '') {                     // фильтр по статусу
-            $orders = array_values(array_filter($orders, fn(array $t): bool => $t['status'] === $status));
+        if ($status !== '') {
+            $orders = array_values(array_filter(
+                $orders,
+                fn(array $o): bool => $o['status'] === $status
+            ));
         }
 
-        view('orders/index', [
-            'title'  => 'Задачи',
-            'orders'  => $orders,
-            'status' => $status,
-        ]);
+        json(array_map([$this, 'format'], $orders));
     }
 
-    // GET /orders/5   (значение {id} из маршрута приходит в параметр $id)
     public function show(string $id): void
     {
         $order = $this->orders->find((int) $id);
         if ($order === null) {
-            notFound();                           // такой задачи нет: страница 404
+            notFound('Заказ не найден');
         }
 
-        view('orders/show', [
-            'client_name'   => $order['client_name'],
-            'order'    => $order,
-            'dish' => $this->dishes->find($order['dish_id']),
-        ]);
+        json($this->format($order));
     }
 
-    // GET /orders/create — форма создания
-    public function create(): void
-    {
-        view('orders/create', [
-            'title'    => 'Новая задача',
-            'dishes' => $this->dishes->all(),
-            'errors'   => [],
-            'old'      => [],
-        ]);
-    }
-
-    // POST /orders — обработка формы
     public function store(): void
     {
-        // Данные формы приходят в массиве $_POST
-        $clientName = trim($_POST['client_name'] ?? '');
-        $dishId = (int) ($_POST['dish_id'] ?? 0);
-        $amount = (int) ($_POST['amount'] ?? 0);
+        $data = body();
 
-        // Проверка данных на сервере (клиентской проверке доверять нельзя)
+        $clientName = trim($data['clientName'] ?? $data['client_name'] ?? '');
+        $dishId     = (int) ($data['dishId'] ?? $data['dish_id'] ?? 0);
+        $total      = (int) ($data['total'] ?? $data['amount'] ?? 0);
+
         $errors = [];
         if (mb_strlen($clientName) < 3) {
-            $errors['client_name'] = 'Название — не короче 3 символов';
+            $errors['clientName'] = 'Имя клиента — не короче 3 символов';
         }
         if ($this->dishes->find($dishId) === null) {
-            $errors['dish_id'] = 'Выберите блюдо из списка';
+            $errors['dishId'] = 'Выберите блюдо из списка';
         }
-        if ($amount <= 0) {
-            $errors['priority'] = 'Недопустимое количество блюд';
+        if ($total <= 0) {
+            $errors['total'] = 'Сумма должна быть больше нуля';
         }
 
         if ($errors) {
-            http_response_code(422);              // 422: данные не прошли проверку
-            view('orders/create', [
-                'title'    => 'Новая задача',
-                'dishes' => $this->dishes->all(),
-                'errors'   => $errors,
-                'old'      => $_POST,             // вернуть в форму то, что ввёл пользователь
-            ]);
-            return;
+            json(['errors' => $errors], 422);
         }
 
-        $this->orders->add([
+        $order = $this->orders->add([
             'dish_id'     => $dishId,
             'client_name' => $clientName,
             'status'      => 'new',
-            'amount'      => $amount,
+            'amount'      => $total,
             'created_at'  => date('Y-m-d H:i'),
         ]);
 
-        redirect('/orders');                       // после успешной отправки формы — переход на список
+        json($this->format($order), 201);
+    }
+
+    public function update(string $id): void
+    {
+        $order = $this->orders->find((int) $id);
+        if ($order === null) {
+            notFound('Заказ не найден');
+        }
+
+        $data = body();
+
+        if (isset($data['status'])) {
+            $allowed = ['new', 'cooking', 'ready', 'paid', 'cancelled'];
+            if (!in_array($data['status'], $allowed, true)) {
+                json(['errors' => ['status' => 'Недопустимый статус']], 422);
+            }
+            $order['status'] = $data['status'];
+        }
+
+        $order['updated_at'] = date('Y-m-d H:i');
+
+        $this->orders->save($order);
+        json($this->format($order));
+    }
+
+    public function destroy(string $id): void
+    {
+        $order = $this->orders->find((int) $id);
+        if ($order === null) {
+            notFound('Заказ не найден');
+        }
+
+        $this->orders->delete((int) $id);
+        http_response_code(204);
+        exit;
+    }
+
+    private function format(array $order): array
+    {
+        return [
+            'id'         => $order['id'],
+            'dishId'     => $order['dish_id'],
+            'clientName' => $order['client_name'],
+            'status'     => $order['status'],
+            'total'      => $order['amount'],
+            'createdAt'  => $order['created_at'],
+        ];
     }
 }

@@ -18,15 +18,22 @@ function e(mixed $value): string
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
-// Показывает страницу: шапка + шаблон + подвал.
-// view('tasks/index', ['tasks' => $tasks]) подключает app/Views/tasks/index.php,
-// а внутри шаблона будет доступна переменная $tasks.
-function view(string $template, array $data = []): void
+function json(mixed $data, int $status = 200): never
 {
-    extract($data);                                        // ключи массива становятся переменными
-    require APP_PATH . '/Views/layout/header.php';
-    require APP_PATH . '/Views/' . $template . '.php';
-    require APP_PATH . '/Views/layout/footer.php';
+    http_response_code($status);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+function body(): array
+{
+    $raw = file_get_contents('php://input');
+    if ($raw === '' || $raw === false) {
+        return [];
+    }
+    $data = json_decode($raw, true);
+    return is_array($data) ? $data : [];
 }
 
 // Перенаправляет браузер на другой адрес и завершает работу скрипта.
@@ -36,9 +43,7 @@ function redirect(string $path): never
     exit;
 }
 
-function notFound(): never
+function notFound(string $message = 'Ресурс не найден'): never
 {
-    http_response_code(404);
-    view('errors/404', ['path' => parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)]);
-    exit;
+    json(['error' => $message], 404);
 }

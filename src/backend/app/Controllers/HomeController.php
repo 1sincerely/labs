@@ -1,5 +1,4 @@
 <?php
-// app/Controllers/HomeController.php — контроллер главной страницы.
 
 declare(strict_types=1);
 
@@ -10,23 +9,31 @@ use App\Models\OrderRepository;
 
 final class HomeController
 {
-    // GET /
+    private OrderRepository $orders;
+    private DishRepository $dishes;
+
+    public function __construct()
+    {
+        $this->orders = new OrderRepository();
+        $this->dishes = new DishRepository();
+    }
+
     public function index(): void
     {
-        $orders = (new OrderRepository())->all();
-        $dishes = (new DishRepository())->all();
+        $orders = $this->orders->all();
+        $dishes = $this->dishes->all();
 
-        // Считаем, сколько задач в каждом статусе
         $byStatus = ['new' => 0, 'cooking' => 0, 'ready' => 0, 'paid' => 0];
         foreach ($orders as $order) {
-            $byStatus[$order['status']]++;
+            if (isset($byStatus[$order['status']])) {
+                $byStatus[$order['status']]++;
+            }
         }
 
-        view('home', [
-            'title'         => 'Главная',
-            'total'         => count($orders),
-            'byStatus'      => $byStatus,
-            'dishesCount' => count($dishes),
+        json([
+            'totalOrders' => count($orders),
+            'totalDishes' => count($dishes),
+            'byStatus'    => $byStatus,
         ]);
     }
 }
