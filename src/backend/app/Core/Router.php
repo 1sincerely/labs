@@ -1,5 +1,4 @@
 <?php
-// app/Core/Router.php — маршрутизатор: по методу и адресу запроса выбирает контроллер.
 
 declare(strict_types=1);
 
@@ -7,11 +6,8 @@ namespace App\Core;
 
 final class Router
 {
-    // Таблица маршрутов. Каждый маршрут — массив из трёх значений:
-    //   метод (GET/POST), шаблон адреса (/tasks/{id}) и обработчик ([Класс::class, 'метод'])
     private array $routes = [];
 
-    // Регистрация маршрутов: $router->get('/tasks', [TaskController::class, 'index']);
     public function get(string $path, array $handler): void
     {
         $this->add('GET', $path, $handler);
@@ -22,49 +18,59 @@ final class Router
         $this->add('POST', $path, $handler);
     }
 
+    public function put(string $path, array $handler): void
+    {
+        $this->add('PUT', $path, $handler);
+    }
+
+    public function delete(string $path, array $handler): void
+    {
+        $this->add('DELETE', $path, $handler);
+    }
+
     private function add(string $method, string $path, array $handler): void
     {
         $this->routes[] = ['method' => $method, 'path' => $path, 'handler' => $handler];
     }
 
-    // Находит подходящий маршрут и передаёт управление контроллеру
     public function dispatch(string $method, string $uri): void
     {
-        // Из /tasks/5?status=done берём только путь /tasks/5; завершающий «/» отбрасываем
         $path = rtrim(parse_url($uri, PHP_URL_PATH) ?: '/', '/') ?: '/';
 
-        // Маршруты проверяются по порядку: срабатывает первый подходящий
+        $allowedMethods = [];
+
         foreach ($this->routes as $route) {
-            if ($route['method'] !== $method) {
-                continue;                                  // другой метод: пропускаем
-            }
             $params = $this->match($route['path'], $path);
+
             if ($params === null) {
-                continue;                                  // адрес не подходит: пробуем следующий
+                continue;
             }
 
-            [$class, $action] = $route['handler'];         // например, TaskController::class и 'show'
-            $controller = new $class();                    // создаём объект контроллера
-            $controller->$action(...$params);              // вызываем метод, передав параметры из адреса
+            if ($route['method'] !== $method) {
+                $allowedMethods[] = $route['method'];
+                continue;
+            }
+
+            [$class, $action] = $route['handler'];
+            $controller = new $class();
+            $controller->$action(...$params);
             return;
         }
 
-        // Ни один маршрут не подошёл
-        http_response_code(404);
-        view('errors/404', ['path' => $path]);
+        if (!empty($allowedMethods)) {
+            header('Allow: ' . implode(', ', array_unique($allowedMethods)));
+            json(['error' => 'Метод не разрешён'], 405);
+        }
+
+        json(['error' => 'Маршрут не найден'], 404);
     }
 
-    // Сравнивает шаблон маршрута с адресом.
-    //   match('/tasks/{id}', '/tasks/5')  вернёт ['id' => '5']
-    //   match('/tasks', '/tasks')         вернёт []   (маршрут подошёл, параметров нет)
-    //   match('/tasks', '/projects')      вернёт null (не подошёл)
     private function match(string $pattern, string $path): ?array
     {
-        // {id} превращаем в кусочек регулярного выражения «любые символы, кроме /»
         $regex = '#^' . preg_replace('#\{(\w+)\}#', '(?P<$1>[^/]+)', $pattern) . '$#';
         if (!preg_match($regex, $path, $matches)) {
             return null;
         }
-        return array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);   // оставляем только именованные части
+        return array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
     }
 }

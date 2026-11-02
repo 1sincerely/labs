@@ -28,4 +28,48 @@ final class DishRepository
         }
         return null;
     }
+     public function add(array $data): array
+    {
+        $dishes = $this->all();
+        $ids = array_column($dishes, 'id');
+        $dish = ['id' => ($ids ? max($ids) : 0) + 1] + $data;
+        $dishes[] = $dish;
+
+        file_put_contents(
+            $this->file,
+            json_encode($dishes, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+            LOCK_EX
+        );
+        return $dish;
+    }
+
+    public function save(array $dish): void
+    {
+        $dishes = $this->all();
+        foreach ($dishes as $i => $d) {
+            if ($d['id'] === $dish['id']) {
+                $dishes[$i] = $dish;
+                break;
+            }
+        }
+        file_put_contents(
+            $this->file,
+            json_encode($dishes, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+            LOCK_EX
+        );
+    }
+
+    public function delete(int $id): void
+    {
+        $dishes = $this->all();
+        $dishes = array_values(array_filter(
+            $dishes,
+            fn(array $d): bool => $d['id'] !== $id
+        ));
+        file_put_contents(
+            $this->file,
+            json_encode($dishes, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+            LOCK_EX
+        );
+    }
 }

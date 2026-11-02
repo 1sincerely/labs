@@ -1,23 +1,27 @@
 <?php
-// public/index.php — единая точка входа (front controller).
-// Веб-сервер отправляет сюда ВСЕ запросы, а дальше работает наш маршрутизатор.
 
 declare(strict_types=1);
 
-// Пути к каталогам проекта (нужны, чтобы подключать файлы независимо от того, откуда запущен сервер)
 define('BASE_PATH', dirname(__DIR__));
 define('APP_PATH', BASE_PATH . '/app');
 
-require APP_PATH . '/autoload.php';    // автоматическая загрузка классов
-require APP_PATH . '/helpers.php';     // вспомогательные функции: e(), view(), redirect()
+require APP_PATH . '/autoload.php';
+require APP_PATH . '/helpers.php';
 
-$router = new App\Core\Router();       // создаём маршрутизатор
-require BASE_PATH . '/routes/web.php'; // регистрируем маршруты (файл использует переменную $router)
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
+$router = new App\Core\Router();
+require BASE_PATH . '/routes/web.php';
 
 try {
-    // Передаём маршрутизатору метод запроса (GET, POST) и адрес (/tasks/5?status=done)
     $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
 } catch (Throwable $e) {
-    http_response_code(500);           // 500 — внутренняя ошибка сервера
-    view('errors/500', ['message' => config('debug') ? $e->getMessage() : null]);
+    json(['error' => 'Внутренняя ошибка сервера', 'message' => $e->getMessage()], 500);
 }
